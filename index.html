@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PERIODEX</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF8FA3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Periodex">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2913/2913584.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #FF8FA3;
+            --primary-dark: #FF4D6D;
+            --secondary: #C9184A;
+            --accent: #8093F1;
+            --bg-color: #FFF0F3;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #2D2D2D;
+            --text-light: #757575;
+            --shadow: 0 10px 30px rgba(255, 77, 109, 0.15);
+            --radius: 24px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Quicksand', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 10% 20%, rgba(255, 143, 163, 0.2) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(128, 147, 241, 0.2) 0%, transparent 20%);
+            color: var(--text-main); min-height: 100vh; overflow-x: hidden; padding-bottom: 80px;
+        }
+
+        /* NAVIGATION */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center; padding: 20px 30px;
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05); padding-top: env(safe-area-inset-top);
+        }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--secondary); letter-spacing: 1px; }
+
+        /* CONTAINER */
+        .app-container { max-width: 480px; margin: 0 auto; padding: 20px; min-height: 80vh; position: relative; }
+        .page { display: none; animation: fadeIn 0.5s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ELEMENTS */
+        .hero-section { text-align: center; margin-top: 20px; }
+        .hero-img-container { width: 100%; height: 300px; border-radius: var(--radius); overflow: hidden; margin-bottom: 30px; box-shadow: var(--shadow); }
+        .hero-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-title { font-size: 2rem; color: var(--secondary); margin-bottom: 10px; line-height: 1.2; }
+        
+        .form-card { background: var(--card-bg); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; border: 2px solid rgba(255, 255, 255, 0.8); }
+        .input-group { margin-bottom: 30px; text-align: left; }
+        label { display: block; margin-bottom: 10px; font-weight: 700; color: var(--secondary); font-size: 1.1rem; }
+        input[type="date"], input[type="number"] { width: 100%; padding: 18px; border: 2px solid var(--primary); background: #FFF0F5; border-radius: 18px; font-size: 1.1rem; outline: none; transition: var(--transition); color: #333; font-weight: 600; }
+        input:focus { border-color: var(--secondary); background: #FFF; box-shadow: 0 0 0 4px rgba(255, 77, 109, 0.2); }
+
+        .btn-primary { background: linear-gradient(135deg, #FF4D6D, #C9184A); color: white; border: none; padding: 20px 40px; border-radius: 50px; font-size: 1.3rem; font-weight: 700; cursor: pointer; width: 100%; box-shadow: 0 10px 25px rgba(201, 24, 74, 0.4); transition: var(--transition); text-transform: uppercase; letter-spacing: 1px; }
+        .btn-primary:hover { transform: scale(1.02); box-shadow: 0 15px 30px rgba(201, 24, 74, 0.5); }
+
+        /* DASHBOARD */
+        .dashboard-header { text-align: center; margin-bottom: 25px; }
+        .cycle-circle { width: 180px; height: 180px; border-radius: 50%; background: white; margin: 0 auto 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: var(--shadow); border: 8px solid var(--bg-color); position: relative; }
+        .cycle-circle::before { content: ''; position: absolute; top: -8px; left: -8px; right: -8px; bottom: -8px; border-radius: 50%; border: 8px solid var(--primary); border-top-color: transparent; transform: rotate(-45deg); }
+        .days-left { font-size: 3rem; font-weight: 700; color: var(--secondary); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .stat-value { font-weight: 700; font-size: 1.1rem; display: block; margin-bottom: 5px; }
+
+        /* CALENDRIER */
+        .calendar-container { background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+        .calendar-header { text-align: center; margin-bottom: 15px; font-weight: 700; color: var(--secondary); }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .cal-day-name { text-align: center; font-size: 0.8rem; color: var(--text-light); padding-bottom: 10px; }
+        .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.9rem; position: relative; }
+        .is-period { background-color: #FF4D6D; color: white; }
+        .is-ovulation { background-color: #8093F1; color: white; border: 2px solid white; box-shadow: 0 0 0 2px #8093F1;}
+        .is-fertile { background-color: #E0C3FC; color: #5A189A; }
+        .is-today { border: 2px solid var(--text-main); font-weight: bold; }
+
+        /* SIDEBAR À PROPOS (Style Nouveau) */
+        .about-sidebar {
+            position: fixed; top: 0; right: -100%; /* Caché par défaut */
+            width: 85%; max-width: 350px; height: 100%;
+            background: white; z-index: 2000;
+            box-shadow: -5px 0 30px rgba(0,0,0,0.1);
+            padding: 30px; transition: right 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            display: flex; flex-direction: column; overflow-y: auto;
+        }
+        .about-sidebar.open { right: 0; }
+        
+        .overlay-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3); z-index: 1999;
+            opacity: 0; visibility: hidden; transition: 0.3s;
+        }
+        .overlay-backdrop.open { opacity: 1; visibility: visible; }
+
+        /* STYLE DE LA PHOTO STYLISÉE */
+        .creator-img { 
+            width: 120px; height: 120px; 
+            border-radius: 50%; /* Rend la photo ronde */
+            object-fit: cover; /* Recadre l'image proprement */
+            margin: 0 auto 20px; 
+            border: 4px solid var(--bg-color); 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            display: block;
+        }
+        
+        .close-sidebar-btn { position: absolute; top: 20px; left: 20px; font-size: 1.5rem; color: var(--secondary); cursor: pointer; }
+
+        /* IA & NAV */
+        .ai-fab { position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 5px 20px rgba(128, 147, 241, 0.6); cursor: pointer; z-index: 1000; transition: transform 0.3s; }
+        .chat-window { position: fixed; bottom: 100px; right: 20px; left: 20px; max-width: 350px; height: 400px; background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1001; display: none; flex-direction: column; overflow: hidden; margin-left: auto; border: 1px solid #eee; }
+        .chat-window.open { display: flex; animation: slideUp 0.3s; }
+        .chat-header { background: var(--accent); color: white; padding: 15px; font-weight: 700; display: flex; justify-content: space-between; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #F9FAFF; display: flex; flex-direction: column; gap: 10px; }
+        .chat-input-area { padding: 10px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        .chat-input { flex: 1; border: 1px solid #ddd; padding: 10px; border-radius: 20px; outline: none; }
+        .chat-send { background: var(--secondary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+        .msg { padding: 10px 15px; border-radius: 15px; font-size: 0.9rem; max-width: 80%; line-height: 1.4; }
+        .msg.bot { background: #E0E7FF; color: #333; align-self: flex-start; }
+        .msg.user { background: var(--secondary); color: white; align-self: flex-end; }
+        
+        .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; padding-bottom: calc(15px + env(safe-area-inset-bottom)); box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 999; }
+        .nav-item { color: var(--text-light); text-align: center; font-size: 0.8rem; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--secondary); transform: translateY(-5px); }
+        .nav-item i { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+        .text-pink { color: var(--primary-dark); }
+        @media (min-width: 768px) { .app-container { max-width: 800px; } .hero-section { display: flex; align-items: center; text-align: left; gap: 40px; } .mobile-nav { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div id="backdrop" class="overlay-backdrop" onclick="toggleSidebar()"></div>
+    <div id="about-sidebar" class="about-sidebar">
+        <i class="fas fa-times close-sidebar-btn" onclick="toggleSidebar()"></i>
+        
+        <div style="margin-top: 40px; text-align: center;">
+            <img src="img/IMG-20241204-WA0034 (2).jpg" alt="Daniel Kamena" class="creator-img">
+            
+            <h2 style="color:var(--secondary); margin-bottom:15px; font-weight:800;">PERIODEX</h2>
+            
+            <p style="color:#666; font-size:0.95rem; line-height:1.6; margin-bottom: 30px;">
+                Bienvenue sur Periodex. Cette application a été pensée pour offrir aux femmes un outil moderne, doux et privé pour suivre leur santé intime.
+            </p>
+            
+            <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
+                <p style="color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:0.8rem; margin-bottom:5px;">Développé par</p>
+                <h3 style="color:var(--text-main); font-size:1.4rem; margin-bottom: 5px;">Daniel Kamena</h3>
+                <p style="font-size:0.85rem; color:#999;">Visionnaire & Créateur</p>
+            </div>
+            
+            <div style="margin-top: 40px;">
+                <p style="font-size: 0.8rem; color: #ccc;">Version 2.1 (PWA Ready)</p>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-feather-alt"></i> PERIODEX</div>
+        <i class="fas fa-bars" onclick="toggleSidebar()" style="font-size:1.4rem; color:var(--text-main); cursor:pointer;"></i>
+    </nav>
+
+    <div class="app-container">
+        <section id="home-page" class="page active">
+            <div class="hero-section">
+                <div class="hero-img-container">
+                    <img src="https://www.loveandgreen.fr/cdn/shop/articles/Capture_d_ecran_2023-09-21_155625.png?v=1695304651" alt="Femme heureuse">
+                </div>
+                <div>
+                    <h1 class="hero-title">L'harmonie avec votre corps.</h1>
+                    <p style="margin-bottom: 30px; color: #777;">Vos données, votre rythme, votre santé.</p>
+                    
+                    <button class="btn-primary" onclick="checkDataAndStart()">Commencer le suivi</button>
+                    
+                    <button id="install-btn" style="display:none; margin-top:15px; background:white; color:var(--secondary); border:2px solid var(--secondary); padding:10px 20px; border-radius:50px; font-weight:bold; cursor:pointer;">
+                        <i class="fas fa-download"></i> Installer l'app
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="calculator-page" class="page">
+            <div class="form-card">
+                <h2 style="margin-bottom: 25px; color: var(--secondary); font-size: 1.8rem;">Paramétrez votre cycle</h2>
+                
+                <div class="input-group">
+                    <label><i class="far fa-calendar-alt"></i> Date des dernières règles</label>
+                    <input type="date" id="lastPeriodInput">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-sync-alt"></i> Durée du cycle (jours)</label>
+                    <input type="number" id="cycleLengthInput" value="28" placeholder="Ex: 28">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-hourglass-half"></i> Durée des règles (jours)</label>
+                    <input type="number" id="periodLengthInput" value="5" placeholder="Ex: 5">
+                </div>
+
+                <button class="btn-primary" onclick="calculateAndShowResults()">
+                    <i class="fas fa-calculator"></i> Calculer mon cycle
+                </button>
+            </div>
+        </section>
+
+        <section id="dashboard-page" class="page">
+            <div class="dashboard-header">
+                <h3>Votre prochain cycle</h3>
+                <p id="next-period-date" class="text-pink" style="font-weight:bold; margin-top:5px;">--</p>
+            </div>
+            <div class="cycle-circle">
+                <span class="days-left" id="days-remaining">--</span>
+                <span style="font-size: 0.9rem; color: #777;">Jours restants</span>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-baby" style="font-size: 1.5rem; color: var(--accent); margin-bottom: 10px;"></i>
+                    <span class="stat-value" id="ovulation-date">--</span>
+                    <span style="font-size: 0.8rem; color: #777;">Ovulation prévue</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-venus" style="font-size: 1.5rem; color: #FF4D6D; margin-bottom: 10px;"></i>
+                    <span class="stat-value" id="fertile-window">--</span>
+                    <span style="font-size: 0.8rem; color: #777;">Fenêtre Fertilité</span>
+                </div>
+            </div>
+            <div class="calendar-container">
+                <div class="calendar-header" id="calendar-month-year">Mois Année</div>
+                <div class="calendar-grid" id="calendar-body"></div>
+            </div>
+            <div style="height: 100px;"></div> 
+        </section>
+    </div>
+
+    <div class="ai-fab" onclick="toggleChat()"><i class="fas fa-comment-dots"></i></div>
+    
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header"><span><i class="fas fa-robot"></i> Assistant Luna</span> <i class="fas fa-times" style="cursor:pointer" onclick="toggleChat()"></i></div>
+        <div class="chat-body" id="chat-body"><div class="msg bot">Bonjour ! Je suis Luna. Une question sur votre cycle ? 🌸</div></div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Posez une question..." onkeypress="handleEnter(event)">
+            <button class="chat-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div class="mobile-nav" id="bottom-nav" style="display: none;">
+        <div class="nav-item" onclick="goToPage('home-page')"><i class="fas fa-home"></i> Accueil</div>
+        <div class="nav-item active" onclick="goToPage('dashboard-page')"><i class="fas fa-chart-pie"></i> Cycle</div>
+        <div class="nav-item" onclick="goToPage('calculator-page')"><i class="fas fa-cog"></i> Réglages</div>
+    </div>
+
+    <script>
+        // --- LOGIQUE BOUTON COMMENCER INTELLIGENT ---
+        function checkDataAndStart() {
+            const savedData = localStorage.getItem('periodex_user_data');
+            if (savedData) {
+                loadData(); 
+                goToPage('dashboard-page');
+            } else {
+                goToPage('calculator-page');
+            }
+        }
+
+        // --- GESTION SIDEBAR ---
+        function toggleSidebar() {
+            document.getElementById('about-sidebar').classList.toggle('open');
+            document.getElementById('backdrop').classList.toggle('open');
+        }
+
+        // --- PWA INSTALLATION ---
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'inline-block';
+        });
+
+        installBtn.addEventListener('click', () => {
+            installBtn.style.display = 'none';
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') console.log('User accepted');
+                deferredPrompt = null;
+            });
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Remplacer par votre chemin réel si besoin
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
+        }
+
+        // --- CORE LOGIC & STATE ---
+        // On initialise avec des valeurs par défaut pour éviter les bugs si le chat est utilisé tout de suite
+        const state = { 
+            lastPeriod: new Date(), 
+            cycleLength: 28, 
+            periodLength: 5, 
+            results: {
+                nextPeriod: new Date(),
+                ovulation: new Date(),
+                fertileStart: new Date(),
+                fertileEnd: new Date(),
+                daysRemaining: 0
+            } 
+        };
+
+        function saveData() {
+            const data = {
+                date: document.getElementById('lastPeriodInput').value,
+                cycle: document.getElementById('cycleLengthInput').value,
+                period: document.getElementById('periodLengthInput').value
+            };
+            localStorage.setItem('periodex_user_data', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('periodex_user_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if(data.date) {
+                    document.getElementById('lastPeriodInput').value = data.date;
+                    document.getElementById('cycleLengthInput').value = data.cycle;
+                    document.getElementById('periodLengthInput').value = data.period;
+                    calculateAndShowResults(false); 
+                }
+            } else {
+                document.getElementById('lastPeriodInput').valueAsDate = new Date();
+            }
+        }
+
+        function goToPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            const nav = document.getElementById('bottom-nav');
+            if (pageId === 'home-page') nav.style.display = 'none';
+            else nav.style.display = 'flex';
+        }
+
+        function calculateAndShowResults(shouldNavigate = true) {
+            const dateInput = document.getElementById('lastPeriodInput').value;
+            const cycleInput = parseInt(document.getElementById('cycleLengthInput').value);
+            const periodInput = parseInt(document.getElementById('periodLengthInput').value);
+
+            if (!dateInput && shouldNavigate) { alert("Merci de mettre une date."); return; }
+            if (!dateInput) return;
+
+            saveData();
+
+            state.lastPeriod = new Date(dateInput);
+            state.cycleLength = cycleInput || 28;
+            state.periodLength = periodInput || 5;
+
+            // Calculs
+            const nextPeriod = new Date(state.lastPeriod);
+            nextPeriod.setDate(state.lastPeriod.getDate() + state.cycleLength);
+            
+            const ovulation = new Date(nextPeriod);
+            ovulation.setDate(nextPeriod.getDate() - 14);
+
+            const fertileStart = new Date(ovulation);
+            fertileStart.setDate(ovulation.getDate() - 5);
+            const fertileEnd = new Date(ovulation);
+            fertileEnd.setDate(ovulation.getDate() + 1);
+
+            const today = new Date();
+            today.setHours(0,0,0,0); // Normaliser aujourd'hui
+            const diffTime = nextPeriod - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+            state.results = { nextPeriod, ovulation, fertileStart, fertileEnd, daysRemaining: diffDays > 0 ? diffDays : 0 };
+            updateUI();
+            if(shouldNavigate) goToPage('dashboard-page');
+        }
+
+        function updateUI() {
+            const options = {weekday:'long', day:'numeric', month:'long'};
+            // Vérification de sécurité avant d'afficher
+            if(state.results.nextPeriod) {
+                document.getElementById('next-period-date').innerText = state.results.nextPeriod.toLocaleDateString('fr-FR', options);
+                document.getElementById('days-remaining').innerText = state.results.daysRemaining;
+                document.getElementById('ovulation-date').innerText = state.results.ovulation.toLocaleDateString('fr-FR', {day:'numeric', month:'short'});
+                document.getElementById('fertile-window').innerText = `${state.results.fertileStart.getDate()} - ${state.results.fertileEnd.toLocaleDateString('fr-FR', {day:'numeric', month:'short'})}`;
+            }
+            generateCalendar();
+        }
+
+        function generateCalendar() {
+            const calendarBody = document.getElementById('calendar-body');
+            const calendarHeader = document.getElementById('calendar-month-year');
+            calendarBody.innerHTML = ''; 
+
+            const days = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+            days.forEach(d => {
+                const div = document.createElement('div'); div.className = 'cal-day-name'; div.innerText = d;
+                calendarBody.appendChild(div);
+            });
+
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+            calendarHeader.innerText = today.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'}).toUpperCase();
+
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            let startDay = firstDay.getDay() - 1; if (startDay === -1) startDay = 6;
+
+            for (let i = 0; i < startDay; i++) calendarBody.appendChild(document.createElement('div'));
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div'); dayDiv.className = 'cal-day'; dayDiv.innerText = i;
+                const currentDate = new Date(currentYear, currentMonth, i);
+                
+                const lp = state.lastPeriod; const pe = new Date(lp); pe.setDate(lp.getDate() + state.periodLength);
+                const np = state.results.nextPeriod; const ne = new Date(np); ne.setDate(np.getDate() + state.periodLength);
+                const fs = state.results.fertileStart; const fe = state.results.fertileEnd; const ov = state.results.ovulation;
+                
+                currentDate.setHours(0,0,0,0); const t = new Date(); t.setHours(0,0,0,0);
+
+                if (currentDate.getTime() === t.getTime()) dayDiv.classList.add('is-today');
+                
+                // Logique d'affichage simplifiée pour la démo (ne gère pas tous les mois parfaitement sans librairie, mais suffisant pour la PWA actuelle)
+                if ((currentDate >= lp && currentDate < pe) || (currentDate >= np && currentDate < ne)) dayDiv.classList.add('is-period');
+                else if (currentDate >= fs && currentDate <= fe) {
+                     if (currentDate.getTime() === ov.getTime()) dayDiv.classList.add('is-ovulation');
+                     else dayDiv.classList.add('is-fertile');
+                }
+                calendarBody.appendChild(dayDiv);
+            }
+        }
+
+        // --- IA LUNA INTELLIGENTE ---
+        function toggleChat() { document.getElementById('chat-window').classList.toggle('open'); }
+        function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+        
+        function sendMessage() {
+            const input = document.getElementById('chat-input'); 
+            const text = input.value.trim(); 
+            if(!text) return;
+            
+            addMsg(text, 'user'); 
+            input.value = '';
+            
+            // Simulation de réflexion (délai aléatoire)
+            setTimeout(() => { 
+                const response = getSmartResponse(text);
+                addMsg(response, 'bot'); 
+            }, 700);
+        }
+
+        function addMsg(text, type) {
+            const d = document.createElement('div'); d.className = `msg ${type}`; d.innerHTML = text;
+            const b = document.getElementById('chat-body'); b.appendChild(d); b.scrollTop = b.scrollHeight;
+        }
+
+        // C'EST ICI QUE L'INTELLIGENCE OPÈRE
+        function getSmartResponse(input) {
+            // 1. Nettoyage du texte (minuscule, sans accents)
+            const text = input.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            // Formatage des dates pour les réponses
+            const nextP = state.results.nextPeriod ? state.results.nextPeriod.toLocaleDateString('fr-FR', {day:'numeric', month:'long'}) : "bientôt";
+            const ovu = state.results.ovulation ? state.results.ovulation.toLocaleDateString('fr-FR', {day:'numeric', month:'long'}) : "inconnue";
+
+            // 2. LOGIQUE DE DÉTECTION (Mots-clés enrichis)
+            
+            // SALUTATIONS
+            if (text.match(/bonjour|salut|hello|coucou|hi/)) {
+                return "Coucou ! 👋 Je suis Luna. Comment puis-je t'aider aujourd'hui ? Tu peux me demander tes dates ou des conseils santé.";
+            }
+
+            // PROCHAINES RÈGLES (utilise les vraies données)
+            if (text.match(/quand|date|prochain|arrive|jour/) && text.match(/regle|menstru|cycle/)) {
+                const days = state.results.daysRemaining;
+                if (days < 1) return "D'après mes calculs, elles devraient être là aujourd'hui ou demain ! Prépare tes protections. 🩸";
+                return `Tes prochaines règles sont prévues pour le **${nextP}**. Il reste environ ${days} jours.`;
+            }
+
+            // OVULATION & FERTILITÉ (utilise les vraies données)
+            if (text.match(/ovulation|fertile|bebe|enceinte|grossesse/)) {
+                return `Ton pic d'ovulation est estimé au **${ovu}**. C'est le moment idéal si tu désires un bébé, sinon prudence ! 🥚`;
+            }
+
+            // DOULEURS & SANTÉ
+            if (text.match(/mal|douleur|crampe|ventre|bobo|tete|fatigue/)) {
+                return "Je suis désolée que tu aies mal. 💆‍♀️ Voici mes conseils :<br>- Bouillotte chaude sur le ventre<br>- Tisane de camomille<br>- Repos (ne force pas)<br>Si la douleur est trop forte, n'hésite pas à voir un médecin.";
+            }
+
+            // RETARD
+            if (text.match(/retard|pas la|inquiete|peur/)) {
+                return "Un retard peut être dû au stress, à un changement de poids ou de régime. Si tu as plus de 5 jours de retard et une activité sexuelle, un test de grossesse peut te rassurer. 🧘‍♀️";
+            }
+
+            // HYGIÈNE
+            if (text.match(/protection|tampon|serviette|cup|flux/)) {
+                return "Pense à changer ta protection toutes les 4 à 6 heures pour éviter les infections. La Cup doit être stérilisée à chaque début de cycle !";
+            }
+
+            // HUMEUR / EMOTIONS
+            if (text.match(/triste|deprime|enerve|pleure|colere/)) {
+                return "C'est probablement le SPM (Syndrome Pré-Menstruel). Tes hormones jouent au yo-yo. Prends du chocolat noir 🍫, respire un bon coup, ça va passer !";
+            }
+
+            // DURÉE / REGLAGES
+            if (text.match(/duree|changer|reglage|modifier/)) {
+                return "Tu peux modifier la durée de ton cycle dans l'onglet 'Réglages' (la roue dentée) en bas de l'écran. ⚙️";
+            }
+
+            // MERCI
+            if (text.match(/merci|top|genial|cool/)) {
+                return "Avec plaisir ! Prends soin de toi. 💖";
+            }
+
+            // RÉPONSE PAR DÉFAUT (Fallback plus intelligent)
+            return "Je ne suis pas sûre de comprendre. Tu peux me demander : <br>👉 'Quand sont mes règles ?'<br>👉 'Date ovulation'<br>👉 'J'ai mal au ventre'<br>👉 'J'ai du retard'";
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
