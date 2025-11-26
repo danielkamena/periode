@@ -136,6 +136,60 @@
         .nav-item.active { color: var(--secondary); transform: translateY(-5px); }
         .nav-item i { display: block; font-size: 1.4rem; margin-bottom: 4px; }
         .text-pink { color: var(--primary-dark); }
+        
+        /* STYLE IOS PROMPT */
+        .ios-prompt {
+            display: none; /* Caché par défaut */
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            justify-content: center;
+            padding: 0 20px;
+            animation: slideUp 0.5s ease;
+        }
+
+        .ios-prompt-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
+
+        .ios-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+
+        .ios-body p { margin-bottom: 10px; font-size: 0.9rem; color: #333; }
+        .ios-body ol { margin-left: 20px; font-size: 0.9rem; line-height: 1.6; color: #555; }
+        .ios-body i { color: var(--accent); }
+
+        /* Flèche décorative pointant vers le bas */
+        .ios-arrow {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; 
+            height: 0; 
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid rgba(255, 255, 255, 0.95);
+        }
+
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @media (min-width: 768px) { .app-container { max-width: 800px; } .hero-section { display: flex; align-items: center; text-align: left; gap: 40px; } .mobile-nav { display: none; } }
     </style>
 </head>
@@ -253,6 +307,23 @@
         </div>
     </div>
 
+    <div id="ios-install-prompt" class="ios-prompt">
+        <div class="ios-prompt-content">
+            <div class="ios-header">
+                <span>Installer Periodex</span>
+                <i class="fas fa-times" onclick="closeIosPrompt()"></i>
+            </div>
+            <div class="ios-body">
+                <p>Pour installer l'application sur votre iPhone :</p>
+                <ol>
+                    <li>Appuyez sur le bouton <strong>Partager</strong> <i class="fas fa-share-square"></i> ci-dessous.</li>
+                    <li>Faites défiler et choisissez <strong>"Sur l'écran d'accueil"</strong> <i class="far fa-plus-square"></i>.</li>
+                </ol>
+            </div>
+            <div class="ios-arrow"></div>
+        </div>
+    </div>
+
     <div class="mobile-nav" id="bottom-nav" style="display: none;">
         <div class="nav-item" onclick="goToPage('home-page')"><i class="fas fa-home"></i> Accueil</div>
         <div class="nav-item active" onclick="goToPage('dashboard-page')"><i class="fas fa-chart-pie"></i> Cycle</div>
@@ -277,7 +348,7 @@
             document.getElementById('backdrop').classList.toggle('open');
         }
 
-        // --- PWA INSTALLATION ---
+        // --- PWA INSTALLATION ANDROID ---
         let deferredPrompt;
         const installBtn = document.getElementById('install-btn');
 
@@ -432,7 +503,7 @@
 
                 if (currentDate.getTime() === t.getTime()) dayDiv.classList.add('is-today');
                 
-                // Logique d'affichage simplifiée pour la démo (ne gère pas tous les mois parfaitement sans librairie, mais suffisant pour la PWA actuelle)
+                // Logique d'affichage simplifiée
                 if ((currentDate >= lp && currentDate < pe) || (currentDate >= np && currentDate < ne)) dayDiv.classList.add('is-period');
                 else if (currentDate >= fs && currentDate <= fe) {
                      if (currentDate.getTime() === ov.getTime()) dayDiv.classList.add('is-ovulation');
@@ -454,7 +525,7 @@
             addMsg(text, 'user'); 
             input.value = '';
             
-            // Simulation de réflexion (délai aléatoire)
+            // Simulation de réflexion
             setTimeout(() => { 
                 const response = getSmartResponse(text);
                 addMsg(response, 'bot'); 
@@ -482,14 +553,14 @@
                 return "Coucou ! 👋 Je suis Luna. Comment puis-je t'aider aujourd'hui ? Tu peux me demander tes dates ou des conseils santé.";
             }
 
-            // PROCHAINES RÈGLES (utilise les vraies données)
+            // PROCHAINES RÈGLES
             if (text.match(/quand|date|prochain|arrive|jour/) && text.match(/regle|menstru|cycle/)) {
                 const days = state.results.daysRemaining;
                 if (days < 1) return "D'après mes calculs, elles devraient être là aujourd'hui ou demain ! Prépare tes protections. 🩸";
                 return `Tes prochaines règles sont prévues pour le **${nextP}**. Il reste environ ${days} jours.`;
             }
 
-            // OVULATION & FERTILITÉ (utilise les vraies données)
+            // OVULATION & FERTILITÉ
             if (text.match(/ovulation|fertile|bebe|enceinte|grossesse/)) {
                 return `Ton pic d'ovulation est estimé au **${ovu}**. C'est le moment idéal si tu désires un bébé, sinon prudence ! 🥚`;
             }
@@ -524,11 +595,46 @@
                 return "Avec plaisir ! Prends soin de toi. 💖";
             }
 
-            // RÉPONSE PAR DÉFAUT (Fallback plus intelligent)
+            // RÉPONSE PAR DÉFAUT
             return "Je ne suis pas sûre de comprendre. Tu peux me demander : <br>👉 'Quand sont mes règles ?'<br>👉 'Date ovulation'<br>👉 'J'ai mal au ventre'<br>👉 'J'ai du retard'";
         }
 
-        window.onload = loadData;
+        // --- DETECTION IOS ---
+        function isIOS() {
+            return [
+                'iPad Simulator',
+                'iPhone Simulator',
+                'iPod Simulator',
+                'iPad',
+                'iPhone',
+                'iPod'
+            ].includes(navigator.platform)
+            // iPad sur iOS 13+ detection
+            || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+        }
+
+        function checkIosInstall() {
+            const isIosDevice = isIOS();
+            const isStandalone = window.navigator.standalone === true;
+
+            if (isIosDevice && !isStandalone) {
+                // On attend un peu que la page charge
+                setTimeout(() => {
+                    document.getElementById('ios-install-prompt').style.display = 'flex';
+                }, 2000);
+            }
+        }
+
+        function closeIosPrompt() {
+            document.getElementById('ios-install-prompt').style.display = 'none';
+        }
+
+        // --- INITIALISATION GLOBALE ---
+        window.addEventListener('load', () => {
+            loadData();
+            checkIosInstall();
+        });
+
     </script>
 </body>
 </html>
