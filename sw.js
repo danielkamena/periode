@@ -1,15 +1,18 @@
-const CACHE_NAME = 'periodex-v2'; // J'ai monté la version pour forcer la mise à jour
+const CACHE_NAME = 'periodex-v3'; // J'incrémente la version (v3) pour forcer le rafraîchissement
+                                  // et la prise en compte de la nouvelle icône chez les utilisateurs.
 
 // Liste des fichiers critiques à charger immédiatement
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  // VOTRE NOUVELLE ICÔNE PWA PROFESSIONNELLE AJOUTÉE ICI
+  './icon-pwa.png', 
   // Polices et Icones
   'https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;600;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
-  // Icone de l'app (pour que l'icone reste visible hors ligne)
-  'https://cdn-icons-png.flaticon.com/512/2913/2913584.png',
+  // L'ANCIENNE ICÔNE FLATICON A ÉTÉ SUPPRIMÉE
+  
   // VOTRE PHOTO DE PROFIL (Attention au chemin exact)
   // Il est préférable de renommer votre image sans espaces ni parenthèses
   // Si vous gardez le nom actuel, assurez-vous qu'il correspond exactement au dossier img
@@ -27,7 +30,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// 2. ACTIVATION : On nettoie les anciens caches (v1, etc.)
+// 2. ACTIVATION : On nettoie les anciens caches (v2, etc.)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keyList) => {
@@ -62,7 +65,6 @@ self.addEventListener('fetch', (event) => {
         }
 
         // IMPORTANT : On clone la réponse pour la mettre dans le cache
-        // Cela permet de sauvegarder l'image externe (hero image) pour la prochaine fois
         const responseToCache = networkResponse.clone();
 
         caches.open(CACHE_NAME).then((cache) => {
