@@ -1,11 +1,19 @@
 {
-  "name": "PERIODEX",
+  "name": "PERIODEX - Suivi de Cycle",
   "short_name": "Periodex",
-  "start_url": "index.html",
+  "description": "Une application simple pour suivre votre cycle menstruel.",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#FFF0F3",
   "theme_color": "#FF8FA3",
   "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2913/2913584.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2913/2913584.png",
       "sizes": "192x192",
@@ -15,6 +23,12 @@
       "src": "https://cdn-icons-png.flaticon.com/512/2913/2913584.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2913/2913584.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
